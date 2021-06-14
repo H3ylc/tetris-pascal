@@ -15,11 +15,17 @@ type
 		{ 4 different rotation positions }
 	end;
 var
+	speed: integer = 150;
 	Field: array[1..FieldWidth, 1..FieldHeight] of boolean;
 	{ True if there is something }
 	TetriminosPatterns: array[1..7] of TetriminosArray;
 	{ There is only 7 different types of tetriminos }
 
+procedure Quit;
+begin
+	clrscr();
+	halt;
+end;
 
 procedure WriteObject(x, y: integer; color: word; obj: string);
 begin
@@ -41,6 +47,13 @@ procedure FieldInit;
 var
 	x, y: integer;
 begin
+	{ Check window resolution }
+	if (ScreenWidth < 22) or (ScreenHeight < 22) then
+	begin
+		WriteObject(1, 1, RED, 'TooSmallWindow');
+		delay(750);
+		Quit;
+	end;
 	{ Field is empty }
 	for x := 1 to 10 do
 	begin
@@ -103,37 +116,6 @@ begin
 	TetriminosPatterns[1].y[4] := 3;
 end;
 
-
-procedure SaveInField(tetrim: TetriminosArray);
-var
-	lx, ly, i: integer;
-begin
-	for i := 1 to 4 do
-	begin
-		lx := tetrim.x[i] div 2 - 1;
-		ly := tetrim.y[i] - 1;
-		Field[lx, ly] := True;
-	end;
-end;
-
-function IsThereBlock(tetrim: TetriminosArray): boolean;
-var
-	lx, ly, i: integer;
-begin
-	for i := 1 to 4 do
-	begin
-		lx := tetrim.x[i] div 2 - 1;
-		ly := tetrim.y[i];
-		if (Field[lx, ly]) or (ly = 21) then
-		begin
-			SaveInField(tetrim);
-			IsThereBlock := true;
-			exit;
-		end;
-	end;
-	IsThereBlock := false;
-end;
-
 procedure CreateTetrimino(var tetrim: TetriminosArray);
 var
 	id: integer;
@@ -144,17 +126,57 @@ begin
 	WriteTetrimino(tetrim);
 end;
 
+procedure SaveInField(tetrim: TetriminosArray);
+var
+	lx, ly, i: integer;
+begin
+	for i := 1 to 4 do
+	begin
+		if tetrim.y[i] <= 1 then
+			exit;
+		lx := tetrim.x[i] div 2 - 1;
+		ly := tetrim.y[i] - 1;
+		Field[lx, ly] := True;
+	end;
+end;
+
+function IsThereBlock(tetrim: TetriminosArray; save: boolean): boolean;
+var
+	lx, ly, i, modif: integer;
+begin
+	{ WITHOUT -1 TO 'ly' MOVEMENT WILL WORK WRONG }
+	modif := 0;
+	if not save then
+		modif := 1;
+
+	for i := 1 to 4 do
+	begin
+		lx := tetrim.x[i] div 2 - 1;
+		ly := tetrim.y[i] - modif;
+
+		if (Field[lx, ly]) or (ly = 21) then
+		begin
+			if save then
+				SaveInField(tetrim);
+			IsThereBlock := true;
+			exit;
+		end;
+	end;
+	IsThereBlock := false;
+end;
+
 function TetriminoFall(var tetrim: TetriminosArray): boolean;
 { If true then tetrimino fell on something }
 var
 	i: integer;
 begin
-	if IsThereBlock(tetrim) then
+	if IsThereBlock(tetrim, true) then
 	begin
 		TetriminoFall := true;
 		exit;
 	end;
 	TetriminoFall := false;
+
 	ClearTetrimino(tetrim);
 	for i := 1 to 4 do
 	begin
@@ -162,46 +184,85 @@ begin
 	end;
 	WriteTetrimino(tetrim);
 end;
-{procedure TetriminoMove;
-procedure TetriminoRotate;}
+
+procedure TetriminoMove(var tetrim: TetriminosArray; direction: byte);
+{ direction = 1 - left; 2 - right }
+var
+	i, shift: integer;
+	temptetr: TetriminosArray;
+begin
+	if direction = 1 then
+		shift := -2 
+	else if direction = 2 then
+		shift := 2;
+
+	temptetr := tetrim;
+
+	for i := 1 to 4 do
+	begin
+		temptetr.x[i] := temptetr.x[i] + shift;
+		{ Check if it in border or not at something }
+		if (temptetr.x[i] < 2) or (temptetr.x[i] >= 22) or
+			IsThereBlock(temptetr, false) then
+			exit;
+	end;
+
+	ClearTetrimino(tetrim);
+	tetrim := temptetr;
+	WriteTetrimino(tetrim);
+	delay(speed);
+end;
+
+{procedure TetriminoRotate;}
 
 procedure Lose;
 begin
 	WriteObject(ScreenWidth div 2 - 4, 1, RED, 'LOSE');
 	delay(1000);
-	clrscr();
-	halt();
+	Quit();
 end;
 
 var
 	CurrentTetrimino: TetriminosArray;
 	ch: char;
 	i: integer;
+	spmod: byte; { speed modifier }
 begin
 	randomize();
 	clrscr();
 	FieldInit();
 	TetriminosPatternsInit();
 	CreateTetrimino(CurrentTetrimino);
+	spmod := 1;
 	while true do
 	begin
-		delay(100);
-		for i := 4 to 8 do
+		while not keypressed do
 		begin
-			if (Field[i, 2]) or (Field[i, 1]) then
-				Lose;
-		end;
-		if TetriminoFall(CurrentTetrimino) then
-		begin
-			CreateTetrimino(CurrentTetrimino);
+			{ the lower the value, the higher the speed }
+			delay(speed div spmod);
+
+			{ Check the top of the field. }
+			{ From 4 to 8 because new tetrimino parts }
+			{ appear at these coordinates.            }
+			for i := 4 to 8 do
+			begin
+				if Field[i, 1] then
+					Lose;
+			end;
+
+			if TetriminoFall(CurrentTetrimino) then
+			begin
+				CreateTetrimino(CurrentTetrimino);
+				spmod := 1; { reset modifier }
+			end;
 		end;
 		ch := readkey();
-		if ch = 'q' then
-		begin
-			clrscr();
-			halt;
+		case ch of
+			'q': Quit();
+			'a': TetriminoMove(CurrentTetrimino, 1);
+			'd': TetriminoMove(CurrentTetrimino, 2);
+			's': spmod := 2;
 		end;
 	end;
-	readkey();
 	clrscr();
 end.

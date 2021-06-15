@@ -15,6 +15,8 @@ type
 		{ 4 different rotation positions }
 	end;
 var
+	Colors: array[1..7] of word = (
+		YELLOW, CYAN, MAGENTA, GREEN, RED, LIGHTRED, BLUE );
 	speed: integer = 150;
 	Field: array[1..FieldWidth, 1..FieldHeight] of boolean;
 	{ True if there is something }
@@ -87,7 +89,7 @@ var
 begin
 	for i := 1 to 4 do
 	begin
-		WriteObject(tetrim.x[i], tetrim.y[i], BLUE, TetriminoBlock);
+		WriteObject(tetrim.x[i], tetrim.y[i], Colors[tetrim.id], TetriminoBlock);
 	end;
 end;
 
@@ -102,18 +104,93 @@ begin
 end;
 
 procedure TetriminosPatternsInit;
+var
+	i: byte;
 begin
-	{ 1. Square }
-	TetriminosPatterns[1].id := 1;
-	TetriminosPatterns[1].rotationPos := 1;
-	TetriminosPatterns[1].x[1] := 10;
-	TetriminosPatterns[1].y[1] := 2;
-	TetriminosPatterns[1].x[2] := 12;
-	TetriminosPatterns[1].y[2] := 2;
-	TetriminosPatterns[1].x[3] := 10;
-	TetriminosPatterns[1].y[3] := 3;
-	TetriminosPatterns[1].x[4] := 12;
-	TetriminosPatterns[1].y[4] := 3;
+	{ 1. O }
+	i := 1;
+	TetriminosPatterns[i].id := 1;
+	TetriminosPatterns[i].rotationPos := 1;
+	TetriminosPatterns[i].x[1] := 10;
+	TetriminosPatterns[i].y[1] := 2;
+	TetriminosPatterns[i].x[2] := 12;
+	TetriminosPatterns[i].y[2] := 2;
+	TetriminosPatterns[i].x[3] := 10;
+	TetriminosPatterns[i].y[3] := 3;
+	TetriminosPatterns[i].x[4] := 12;
+	TetriminosPatterns[i].y[4] := 3;
+	{ 2. I }
+	i := 2;
+	TetriminosPatterns[i].id := 2;
+	TetriminosPatterns[i].rotationPos := 1;
+	TetriminosPatterns[i].x[1] := 8;
+	TetriminosPatterns[i].y[1] := 2;
+	TetriminosPatterns[i].x[2] := 10;
+	TetriminosPatterns[i].y[2] := 2;
+	TetriminosPatterns[i].x[3] := 12;
+	TetriminosPatterns[i].y[3] := 2;
+	TetriminosPatterns[i].x[4] := 14;
+	TetriminosPatterns[i].y[4] := 2;
+	{ 3. T }
+	i := 3;
+	TetriminosPatterns[i].id := 3;
+	TetriminosPatterns[i].rotationPos := 1;
+	TetriminosPatterns[i].x[1] := 8;
+	TetriminosPatterns[i].y[1] := 2;
+	TetriminosPatterns[i].x[2] := 10;
+	TetriminosPatterns[i].y[2] := 2;
+	TetriminosPatterns[i].x[3] := 12;
+	TetriminosPatterns[i].y[3] := 2;
+	TetriminosPatterns[i].x[4] := 10;
+	TetriminosPatterns[i].y[4] := 3;
+	{ 4. S }
+	i := 4;
+	TetriminosPatterns[i].id := 4;
+	TetriminosPatterns[i].rotationPos := 1;
+	TetriminosPatterns[i].x[1] := 8;
+	TetriminosPatterns[i].y[1] := 3;
+	TetriminosPatterns[i].x[2] := 10;
+	TetriminosPatterns[i].y[2] := 2;
+	TetriminosPatterns[i].x[3] := 12;
+	TetriminosPatterns[i].y[3] := 2;
+	TetriminosPatterns[i].x[4] := 10;
+	TetriminosPatterns[i].y[4] := 3;
+	{ 5. Z }
+	i := 5;
+	TetriminosPatterns[i].id := 5;
+	TetriminosPatterns[i].rotationPos := 1;
+	TetriminosPatterns[i].x[1] := 8;
+	TetriminosPatterns[i].y[1] := 2;
+	TetriminosPatterns[i].x[2] := 10;
+	TetriminosPatterns[i].y[2] := 2;
+	TetriminosPatterns[i].x[3] := 12;
+	TetriminosPatterns[i].y[3] := 3;
+	TetriminosPatterns[i].x[4] := 10;
+	TetriminosPatterns[i].y[4] := 3;
+	{ 6. J }
+	i := 6;
+	TetriminosPatterns[i].id := 6;
+	TetriminosPatterns[i].rotationPos := 1;
+	TetriminosPatterns[i].x[1] := 8;
+	TetriminosPatterns[i].y[1] := 3;
+	TetriminosPatterns[i].x[2] := 10;
+	TetriminosPatterns[i].y[2] := 3;
+	TetriminosPatterns[i].x[3] := 12;
+	TetriminosPatterns[i].y[3] := 2;
+	TetriminosPatterns[i].x[4] := 12;
+	TetriminosPatterns[i].y[4] := 3;
+	{ 7. L }
+	i := 7;
+	TetriminosPatterns[i].id := 7;
+	TetriminosPatterns[i].rotationPos := 1;
+	TetriminosPatterns[i].x[1] := 8;
+	TetriminosPatterns[i].y[1] := 2;
+	TetriminosPatterns[i].x[2] := 8;
+	TetriminosPatterns[i].y[2] := 3;
+	TetriminosPatterns[i].x[3] := 10;
+	TetriminosPatterns[i].y[3] := 3;
+	TetriminosPatterns[i].x[4] := 12;
+	TetriminosPatterns[i].y[4] := 3;
 end;
 
 procedure CreateTetrimino(var tetrim: TetriminosArray);
@@ -121,7 +198,6 @@ var
 	id: integer;
 begin
 	id := random(7) + 1;
-	id := 1;
 	tetrim := TetriminosPatterns[id];
 	WriteTetrimino(tetrim);
 end;

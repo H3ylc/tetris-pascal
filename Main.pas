@@ -322,7 +322,7 @@ begin
 			{ appear at these coordinates.            }
 			for i := 4 to 8 do
 			begin
-				if Field[i, 1] then
+				if Field[i, 2] then
 					Lose;
 			end;
 
